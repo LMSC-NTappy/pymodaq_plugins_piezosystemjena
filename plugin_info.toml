@@ -6,6 +6,7 @@ description = 'Pymodaq Plugin for the Control of Piezosystem Jena microscopy sta
 
 author = 'Nicolas Tappy'
 author-email = 'nicolas.tappy@epfl.ch'
+license = 'MIT'
 
 [plugin-install]
 #packages required for your plugin:
