@@ -1,5 +1,5 @@
 PyMoDAQ Piezosystem Jena
-###############
+########################
 
 .. image:: https://img.shields.io/pypi/v/pymodaq_plugins.svg
    :target: https://pypi.org/project/pymodaq_plugins/
