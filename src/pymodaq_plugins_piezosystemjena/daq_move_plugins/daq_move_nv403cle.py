@@ -49,7 +49,7 @@ class DAQ_Move_nv403cle(DAQ_Move_base):
                   ]
               }
              ] + comon_parameters
-             # +comon_parameters_fun(is_multiaxes, stage_names)
+
 
     def __init__(self, parent=None, params_state=None):
         """
@@ -65,8 +65,8 @@ class DAQ_Move_nv403cle(DAQ_Move_base):
         """
         super().__init__(parent, params_state)
 
-        self.settings.child('epsilon').setValue(0.01)
-        self.settings.child('timeout').setValue(50.0)
+        self.settings.child('epsilon').setValue(0.1)
+        self.settings.child('timeout').setValue(1.0)
 
         self.settings.child('bounds', 'is_bounds').setValue(True)
         self.settings.child('bounds', 'is_bounds').setReadonly()
@@ -101,9 +101,6 @@ class DAQ_Move_nv403cle(DAQ_Move_base):
             --------
             DAQ_Move_base.get_position_with_scaling, daq_utils.ThreadCommand
         """
-        #Reset buffer first
-        self.controller.reset_buffer()
-
         #Get the index of the current axis
         ax_idx = self.get_current_axis_index()
         #Get Position
@@ -215,10 +212,6 @@ class DAQ_Move_nv403cle(DAQ_Move_base):
                                             f'measured offset = {offset:.3f}']))
 
             #Look at the com devices and search the device description
-            # dvc_tmp = comports()
-            # ports_tmp = [d.device for d in dvc_tmp]
-            # description_tmp = [d.description for d in dvc_tmp]
-            # controller_id = description_tmp[ports_tmp.index(com)] #+ f'Axis {self.get_current_axis_index()} initialised'
             controller_id = self.controller.get_infos()
 
             self.settings.child('controller_id').setValue(controller_id)
@@ -254,9 +247,9 @@ class DAQ_Move_nv403cle(DAQ_Move_base):
         position = self.check_bound(position)
         ax_id = self.get_current_axis_index()
 
+        self.target_position = position
         self.controller.set_position(axis_index=ax_id, value=position)
 
-        self.target_position = position
         self.poll_moving()
 
     def move_Rel(self, position):

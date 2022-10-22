@@ -5,8 +5,10 @@ Demo Wrapper to illustrate the plugin developpement. This Mock wrapper will emul
 import serial
 import warnings
 import time
+import threading
 
 class NV403CLE:
+
     """Class for wrapping NV40/3 CLE commands"""
     def __init__(self, port: str):
         self.ser = serial.Serial()
@@ -15,9 +17,11 @@ class NV403CLE:
         self.ser.parity = serial.PARITY_NONE
         self.ser.stopbits = serial.STOPBITS_ONE
         self.ser.xonxoff = True
-        self.ser.timeout = 1.0
-
+        self.ser.timeout = None
+        self.ser.write_timeout = None
         self.ser.port = port
+
+        self.lock = threading.Lock()
 
     def open(self) -> None:
         """
@@ -33,14 +37,17 @@ class NV403CLE:
             #Maybe raise a warning?
             dumped = self.ser.read_all().decode()
             warnings.warn(f'Dumped IO-buffer content: {dumped}',RuntimeWarning)
-        # self.emit_status(ThreadCommand('Update_Status', [f'Dumped buffer content: {dumped}']))
+
         return dumped
 
     def set_axis_remote(self,axis_index: int, remote: bool) -> None:
         """Enable remote control for one axis."""
         val = int(remote)
         cmd = f'setk,{axis_index:d},{val:d}\r'.encode()
-        self.ser.write(cmd)
+        with self.lock:
+            ret = self.ser.write(cmd)
+            if ret != 9:
+                warnings.warn(f'Unsuccessful command: {cmd.decode()}\n')
 
     def get_position(self, axis_index: int) -> float:
         """
@@ -49,17 +56,18 @@ class NV403CLE:
         -------
         float: The current value
         """
-        _ = self.reset_buffer()
-
-        #Get the index of the current axis
         #Encode it for communication with stage controller
         cmd = f'rk,{axis_index}\r'.encode()
 
-        #Send command and read reply
-        self.ser.write(cmd)
-        reply = self.ser.read(11) #11 is the size of expected reply
-        #Convert value to float
-        pos = float(reply[5:-1])
+        with self.lock:
+            #Send command and read reply
+            ret = self.ser.write(cmd)
+            if ret != 5:
+                warnings.warn(f'Unsuccessful command: {cmd.decode()}\n')
+
+            reply = self.ser.read_until(expected=b'\r')
+            #Convert value to float
+            pos = float(reply[5:-1])
 
         return pos
 
@@ -72,24 +80,28 @@ class NV403CLE:
         else:
             b = brightness
         cmd = f'light,{b}\r'.encode()
+        with self.lock:
+            self.ser.write(cmd)
 
-        self.ser.write(cmd)
 
     def set_closed_loop(self,axis_index: int, closed: bool = True):
         """Set an axis to closed-loop or open-loop control
         """
         val = int(closed)
         cmd = f'cloop,{axis_index},{val}\r'.encode()
-        self.ser.write(cmd)
+        with self.lock:
+            self.ser.write(cmd)
 
     def get_position_offset(self,axis_index: int) -> float:
-        """Measure the offset of the axis, """
+        """Measure the offset"""
         #Get the current position
         current_pos = self.get_position(axis_index)
 
         #Set it as target and measure where it actually lands
         self.set_position(axis_index,value=current_pos)
-        time.sleep(0.500) #Here it is mandatory to wait a little bit
+        time.sleep(0.200)   # Here it is mandatory to wait a little bit
+                            # because we do not know how long it takes
+                            # to stabilize
         return_position = self.get_position(axis_index)
 
         #The difference between the two is the offset
@@ -100,7 +112,7 @@ class NV403CLE:
 
         return offset
 
-    def set_position(self,axis_index: int, value: float) -> None:
+    def set_position(self, axis_index: int, value: float) -> None:
         """
         Send a call to the actuator to move at the given value
         Parameters
@@ -108,8 +120,11 @@ class NV403CLE:
         axis_index: (int) the axis to move
         value: (float) the target value in um
         """
+        #Encode it for communication with stage controller
         cmd = f'set,{axis_index},{value:.3f}\r'.encode()
-        self.ser.write(cmd)
+        #write
+        with self.lock:
+            self.ser.write(cmd)
 
     def get_infos(self) -> str:
         return self.ser.port
