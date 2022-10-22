@@ -18,7 +18,7 @@ This amplifier is well suited for sub-nm positioning tasks.
 The plugin does provide limited support for single-axis and open-loop controller of the same series
 as it was not a target application at the time of writing the plugin.
 
-The control library relies on the pyserial module to communicate with the device using RS232 over usb.
+The control library relies on the pyserial module to communicate with the device using Serial process over usb.
 
 Installing the manufacturer's driver for USB interface is required:
 https://www.piezosystem.com/products/piezo_controller/piezo_controller_3_channel_version/nv_403_cle/
