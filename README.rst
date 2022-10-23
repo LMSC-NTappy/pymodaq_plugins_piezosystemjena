@@ -1,5 +1,5 @@
-PyMoDAQ Piezosystem Jena
-########################
+Piezosystem Jena NV40/3CLE
+##########################
 
 .. image:: https://img.shields.io/pypi/v/pymodaq_plugins.svg
    :target: https://pypi.org/project/pymodaq_plugins/
@@ -15,25 +15,22 @@ PyMoDAQ Piezosystem Jena
 PyMoDAQ plugin for controlling PiezosystemJena voltage amplifier NV40/3 CLE.
 This amplifier is well suited for sub-nm positioning tasks.
 
-The plugin does provide limited support for single-axis and open-loop controller of the same series
+The plugin does provide limited support for single-axis (NV40/1CLE) and open-loop controller of the same series
 as it was not a target application at the time of writing the plugin.
 
 The control library relies on the pyserial module to communicate with the device using Serial process over usb.
 
-Installing the manufacturer's driver for USB interface is required:
-https://www.piezosystem.com/products/piezo_controller/piezo_controller_3_channel_version/nv_403_cle/
+Installing the manufacturer's driver for USB interface is required (Driver USB Software in the following link):
+https://www.piezosystem.com/about-navigation/downloads/
 
 Authors
 =======
-
 * Nicolas Tappy
 
 Instruments
 ===========
-
 Below is the list of instruments included in this plugin
 
 Actuators
 +++++++++
-
 * NV40/3CLE: Closed loop voltage amplifier for the control of piezo elements.
