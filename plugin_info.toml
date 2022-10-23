@@ -1,7 +1,7 @@
 [plugin-info]
 ## To modify by developper(s) of the plugin
 SHORT_PLUGIN_NAME = 'piezosystemjena'
-package-url = 'https://github.com/NT/pymodaq_plugins'
+package-url = 'https://github.com/LMSC-NTappy/pymodaq_plugins_piezosystemjena'
 description = 'Pymodaq Plugin for the Control of Piezosystem Jena microscopy stages'
 
 author = 'Nicolas Tappy'
